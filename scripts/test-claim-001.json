@@ -1,0 +1,9 @@
+{
+  "claim_id": "CLM-2026-001",
+  "patient_id": "PAT-98765",
+  "provider_id": "PRV-11223",
+  "procedure_code": "99213",
+  "diagnosis_code": "J06.9",
+  "claim_amount": 250.00,
+  "service_date": "2026-05-22"
+}

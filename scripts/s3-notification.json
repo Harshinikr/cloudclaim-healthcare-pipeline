@@ -1,0 +1,8 @@
+{
+  "LambdaFunctionConfigurations": [
+    {
+      "LambdaFunctionArn": "arn:aws:lambda:us-east-1:034768441448:function:cloudclaim-ingestion",
+      "Events": ["s3:ObjectCreated:*"]
+    }
+  ]
+}
