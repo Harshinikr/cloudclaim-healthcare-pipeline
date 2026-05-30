@@ -9,3 +9,4 @@ function.zip
 
 # AWS credentials never get committed
 .env
+rules-engine.zip
