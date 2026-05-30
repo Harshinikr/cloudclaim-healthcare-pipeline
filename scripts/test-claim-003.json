@@ -1,0 +1,9 @@
+{
+  "claim_id": "CLM-2026-003",
+  "patient_id": "PAT-33333",
+  "provider_id": "PRV-44444",
+  "procedure_code": "INVALID",
+  "diagnosis_code": "J18.9",
+  "claim_amount": 99999.00,
+  "service_date": "2026-05-29"
+}

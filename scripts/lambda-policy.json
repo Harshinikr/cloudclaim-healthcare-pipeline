@@ -12,6 +12,22 @@
       "Effect": "Allow",
       "Action": "dynamodb:PutItem",
       "Resource": "arn:aws:dynamodb:us-east-1:034768441448:table/cloudclaim-claims"
+    },
+    {
+      "Sid": "SendToSQS",
+      "Effect": "Allow",
+      "Action": "sqs:SendMessage",
+      "Resource": "arn:aws:sqs:us-east-1:034768441448:cloudclaim-claims-queue"
+    },
+    {
+      "Sid": "ReadFromSQS",
+      "Effect": "Allow",
+      "Action": [
+        "sqs:ReceiveMessage",
+        "sqs:DeleteMessage",
+        "sqs:GetQueueAttributes"
+      ],
+      "Resource": "arn:aws:sqs:us-east-1:034768441448:cloudclaim-claims-queue"
     }
   ]
 }

@@ -1,0 +1,4 @@
+{
+  "VisibilityTimeout": "30",
+  "RedrivePolicy": "{\"deadLetterTargetArn\":\"arn:aws:sqs:us-east-1:034768441448:cloudclaim-claims-dlq\",\"maxReceiveCount\":\"3\"}"
+}
