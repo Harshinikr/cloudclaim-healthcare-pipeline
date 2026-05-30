@@ -10,3 +10,8 @@ function.zip
 # AWS credentials never get committed
 .env
 rules-engine.zip
+# Terraform
+infrastructure/.terraform/
+infrastructure/terraform.tfstate
+infrastructure/terraform.tfstate.backup
+*.tfplan
