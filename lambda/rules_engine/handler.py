@@ -9,7 +9,10 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 dynamodb = boto3.resource('dynamodb')
+sns_client = boto3.client('sns')
+
 TABLE_NAME = os.environ.get('DYNAMODB_TABLE', 'cloudclaim-claims')
+SNS_TOPIC_ARN = os.environ.get('SNS_TOPIC_ARN', '')
 
 
 def apply_business_rules(claim: dict) -> tuple[bool, list]:
@@ -64,6 +67,33 @@ def apply_business_rules(claim: dict) -> tuple[bool, list]:
     return len(reasons) == 0, reasons
 
 
+def publish_rejection_alert(claim: dict, rejection_reasons: list):
+    """Publish rejection alert to SNS topic."""
+    if not SNS_TOPIC_ARN:
+        logger.warning("SNS_TOPIC_ARN not set — skipping alert")
+        return
+
+    message = (
+        f"CLAIM REJECTED\n\n"
+        f"Claim ID:      {claim['claim_id']}\n"
+        f"Patient ID:    {claim['patient_id']}\n"
+        f"Provider ID:   {claim['provider_id']}\n"
+        f"Amount:        ${claim['claim_amount']}\n"
+        f"Service Date:  {claim['service_date']}\n\n"
+        f"Rejection Reasons:\n"
+        + "\n".join(f"  - {r}" for r in rejection_reasons)
+        + f"\n\nProcessed at: {datetime.now(timezone.utc).isoformat()}"
+    )
+
+    sns_client.publish(
+        TopicArn=SNS_TOPIC_ARN,
+        Subject=f"CloudClaim Rejection Alert — {claim['claim_id']}",
+        Message=message
+    )
+
+    logger.info(f"Rejection alert published for claim {claim['claim_id']}")
+
+
 def write_to_dynamodb(claim: dict, status: str,
                       rejection_reasons: list = None):
     """Write claim result to DynamoDB."""
@@ -94,7 +124,8 @@ def handler(event, context):
     Triggered by SQS — processes one batch of claim messages.
     """
     logger.info(
-        f"Rules engine invoked with {len(event.get('Records', []))} messages"
+        f"Rules engine invoked with "
+        f"{len(event.get('Records', []))} messages"
     )
 
     for record in event.get('Records', []):
@@ -111,8 +142,10 @@ def handler(event, context):
                 logger.info(f"Claim {claim_id} APPROVED")
             else:
                 write_to_dynamodb(claim, 'REJECTED', rejection_reasons)
+                publish_rejection_alert(claim, rejection_reasons)
                 logger.warning(
-                    f"Claim {claim_id} REJECTED — reasons: {rejection_reasons}"
+                    f"Claim {claim_id} REJECTED — "
+                    f"reasons: {rejection_reasons}"
                 )
 
         except Exception as e:

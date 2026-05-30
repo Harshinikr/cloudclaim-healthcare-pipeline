@@ -1,0 +1,9 @@
+{
+  "claim_id": "CLM-2026-004",
+  "patient_id": "PAT-55555",
+  "provider_id": "PRV-66666",
+  "procedure_code": "BADCODE",
+  "diagnosis_code": "Z00.00",
+  "claim_amount": 75000.00,
+  "service_date": "2026-05-29"
+}

@@ -28,6 +28,12 @@
         "sqs:GetQueueAttributes"
       ],
       "Resource": "arn:aws:sqs:us-east-1:034768441448:cloudclaim-claims-queue"
+    },
+    {
+      "Sid": "PublishToSNS",
+      "Effect": "Allow",
+      "Action": "sns:Publish",
+      "Resource": "arn:aws:sns:us-east-1:034768441448:cloudclaim-rejections"
     }
   ]
 }
