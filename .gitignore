@@ -4,3 +4,8 @@ __pycache__/
 .env
 .aws/
 .vscode/
+# Build artifacts
+function.zip
+
+# AWS credentials never get committed
+.env
