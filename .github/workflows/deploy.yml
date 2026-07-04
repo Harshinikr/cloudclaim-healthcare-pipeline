@@ -1,0 +1,109 @@
+name: CloudClaim CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest boto3
+
+      - name: Run pytest
+        run: |
+          python -m pytest tests/test_rules_engine.py -v
+
+  lint:
+    name: Lint Code
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+
+      - name: Install flake8
+        run: pip install flake8
+
+      - name: Run flake8
+        run: |
+          flake8 lambda/ --max-line-length=100 --ignore=E501,W503
+
+  deploy:
+    name: Deploy to AWS
+    runs-on: ubuntu-latest
+    needs: [test, lint]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Deploy ingestion Lambda
+        run: |
+          cd lambda/ingestion
+          zip -r ../../ingestion.zip handler.py
+          cd ../..
+          aws lambda update-function-code \
+            --function-name cloudclaim-ingestion \
+            --zip-file fileb://ingestion.zip \
+            --region us-east-1
+
+      - name: Deploy rules engine Lambda
+        run: |
+          cd lambda/rules_engine
+          zip -r ../../rules-engine.zip handler.py
+          cd ../..
+          aws lambda update-function-code \
+            --function-name cloudclaim-rules-engine \
+            --zip-file fileb://rules-engine.zip \
+            --region us-east-1
+
+      - name: Deploy query Lambda
+        run: |
+          cd lambda/query
+          zip -r ../../query.zip handler.py
+          cd ../..
+          aws lambda update-function-code \
+            --function-name cloudclaim-query \
+            --zip-file fileb://query.zip \
+            --region us-east-1
+
+      - name: Verify deployment
+        run: |
+          aws lambda get-function \
+            --function-name cloudclaim-ingestion \
+            --region us-east-1 \
+            --query "Configuration.LastModified"
