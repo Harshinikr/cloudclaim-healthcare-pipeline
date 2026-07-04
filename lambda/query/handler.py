@@ -76,3 +76,4 @@ def handler(event, context):
             'error': 'Internal server error',
             'message': str(e)
         })
+        
