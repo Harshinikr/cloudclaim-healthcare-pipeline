@@ -6,8 +6,8 @@ import logging
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-s3_client = boto3.client('s3')
-sqs_client = boto3.client('sqs')
+s3_client = boto3.client('s3', region_name='us-east-1')
+sqs_client = boto3.client('sqs', region_name='us-east-1')
 
 SQS_QUEUE_URL = os.environ.get('SQS_QUEUE_URL', '')
 
@@ -48,7 +48,6 @@ def handler(event, context):
                 )
                 continue
 
-            # Send validated claim to SQS for rules engine to process
             sqs_client.send_message(
                 QueueUrl=SQS_QUEUE_URL,
                 MessageBody=json.dumps(claim),

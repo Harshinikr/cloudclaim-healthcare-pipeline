@@ -2,12 +2,11 @@ import json
 import boto3
 import os
 import logging
-from boto3.dynamodb.conditions import Key
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-dynamodb = boto3.resource('dynamodb')
+dynamodb = boto3.resource('dynamodb', region_name='us-east-1')
 TABLE_NAME = os.environ.get('DYNAMODB_TABLE', 'cloudclaim-claims')
 
 
@@ -32,7 +31,6 @@ def handler(event, context):
     logger.info(f"Query Lambda invoked: {json.dumps(event)}")
 
     try:
-        # Extract claim_id from URL path parameters
         path_params = event.get('pathParameters') or {}
         claim_id = path_params.get('claim_id')
 
@@ -44,7 +42,6 @@ def handler(event, context):
 
         logger.info(f"Querying DynamoDB for claim: {claim_id}")
 
-        # Query DynamoDB
         table = dynamodb.Table(TABLE_NAME)
         result = table.get_item(
             Key={'claim_id': claim_id}

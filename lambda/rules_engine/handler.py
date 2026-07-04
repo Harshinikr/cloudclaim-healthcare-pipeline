@@ -8,8 +8,8 @@ from datetime import datetime, timezone
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-dynamodb = boto3.resource('dynamodb')
-sns_client = boto3.client('sns')
+dynamodb = boto3.resource('dynamodb', region_name='us-east-1')
+sns_client = boto3.client('sns', region_name='us-east-1')
 
 TABLE_NAME = os.environ.get('DYNAMODB_TABLE', 'cloudclaim-claims')
 SNS_TOPIC_ARN = os.environ.get('SNS_TOPIC_ARN', '')
